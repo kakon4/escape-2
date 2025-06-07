@@ -91,6 +91,60 @@
             border-radius: 10px;
         }
         
+        /* קונטיינר התמונה המיוחדת */
+        .image-container {
+            width: 100%;
+            margin: 20px 0;
+            padding: 15px;
+            background-color: rgba(38, 70, 83, 0.8);
+            border-radius: 15px;
+            border: 2px solid var(--yellow);
+            box-shadow: 0 0 20px rgba(233, 196, 106, 0.8);
+            display: none;
+            text-align: center;
+            animation: fadeInScale 1s ease-in-out;
+        }
+        
+        .success-image {
+            width: 100%;
+            max-width: 500px;
+            height: auto;
+            border-radius: 10px;
+            border: 3px solid var(--yellow);
+            box-shadow: 0 0 15px rgba(233, 196, 106, 0.5);
+            transition: transform 0.3s ease;
+        }
+        
+        .success-image:hover {
+            transform: scale(1.02);
+        }
+        
+        .success-title {
+            font-size: 1.8rem;
+            color: var(--yellow);
+            margin-bottom: 15px;
+            text-shadow: 0 0 5px rgba(233, 196, 106, 0.5);
+        }
+        
+        .success-message {
+            font-size: 1.2rem;
+            color: var(--teal);
+            margin-top: 15px;
+            line-height: 1.6;
+        }
+        
+        /* אנימציה להופעת התמונה */
+        @keyframes fadeInScale {
+            0% {
+                opacity: 0;
+                transform: scale(0.8);
+            }
+            100% {
+                opacity: 1;
+                transform: scale(1);
+            }
+        }
+        
         /* התאמות מיוחדות למובייל */
         @media (max-width: 768px) {
             body {
@@ -106,13 +160,21 @@
                 font-size: 2rem;
             }
             
-            .video-container {
+            .video-container, .image-container {
                 padding: 10px;
                 margin: 15px 0;
             }
             
             .video-wrapper {
                 padding-bottom: 60%; /* יחס מותאם למובייל בפורטרט */
+            }
+            
+            .success-title {
+                font-size: 1.5rem;
+            }
+            
+            .success-message {
+                font-size: 1rem;
             }
         }
         
@@ -127,6 +189,10 @@
             
             .video-wrapper {
                 padding-bottom: 65%; /* יחס מותאם למסכים קטנים מאוד */
+            }
+            
+            .success-title {
+                font-size: 1.3rem;
             }
         }
         
@@ -260,6 +326,13 @@
         .shake {
             animation: shake 0.5s ease-in-out;
         }
+        
+        /* הסתרת החידה לאחר פתרון נכון */
+        .riddle-container.solved {
+            opacity: 0.5;
+            pointer-events: none;
+            transform: scale(0.95);
+        }
     </style>
 </head>
 <body>
@@ -289,6 +362,13 @@
                 <div class="feedback" id="feedback-message"></div>
             </div>
         </div>
+        
+        <!-- קונטיינר התמונה שיופיע אחרי פתרון נכון -->
+        <div class="image-container" id="success-container">
+            <h2 class="success-title">🎉 מצוין! פתרת את החידה! 🎉</h2>
+            <img src="saba.jpg" alt="תמונת הצלחה" class="success-image" id="success-image">
+            <p class="success-message">המשיכו בדרכם - ימינה לדלת, שמאלה לחלון!</p>
+        </div>
     </div>
     
     <div class="glow" id="glow"></div>
@@ -314,6 +394,8 @@
         const checkAnswerButton = document.getElementById('check-answer');
         const riddleAnswer = document.getElementById('riddle-answer');
         const feedbackMessage = document.getElementById('feedback-message');
+        const successContainer = document.getElementById('success-container');
+        const riddleContainer = document.querySelector('.riddle-container');
         
         const correctAnswer = "בשיתוף פעולה";
         
@@ -330,13 +412,24 @@
             if (possibleAnswers.some(answer => userAnswer.toLowerCase() === answer.toLowerCase())) {
                 // תשובה נכונה
                 feedbackMessage.className = "feedback correct";
-                feedbackMessage.textContent = "תשובה נכונה! המשיכו בדרכם לך ימינה לדלת לכי שמאלה לחלון, מה יוצא לך ולה.";
+                feedbackMessage.textContent = "תשובה נכונה! המשיכו במסע המיסטי...";
                 feedbackMessage.style.display = "block";
                 
                 // הוספת אנימציה לחידה שנפתרה
-                document.querySelector('.riddle-container').style.boxShadow = "0 0 30px rgba(42, 157, 143, 0.8)";
+                riddleContainer.style.boxShadow = "0 0 30px rgba(42, 157, 143, 0.8)";
                 
-                // כאן אפשר להוסיף פעולות נוספות שקורות כשהתשובה נכונה
+                // הצגת התמונה אחרי דחיית קצר
+                setTimeout(() => {
+                    successContainer.style.display = "block";
+                    riddleContainer.classList.add('solved');
+                    
+                    // גלילה חלקה לתמונה
+                    successContainer.scrollIntoView({ 
+                        behavior: 'smooth', 
+                        block: 'center' 
+                    });
+                }, 1000);
+                
             } else {
                 // תשובה שגויה
                 feedbackMessage.className = "feedback incorrect";
@@ -344,9 +437,9 @@
                 feedbackMessage.style.display = "block";
                 
                 // אנימציה לתשובה שגויה
-                document.querySelector('.riddle-container').classList.add('shake');
+                riddleContainer.classList.add('shake');
                 setTimeout(() => {
-                    document.querySelector('.riddle-container').classList.remove('shake');
+                    riddleContainer.classList.remove('shake');
                 }, 500);
             }
         }
